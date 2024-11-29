@@ -46,9 +46,6 @@
     ]
   },
   "access": {
-    "network": [
-      "*"
-    ],
     "project": "CONTRIBUTE"
   },
   "regionalOptions": {
