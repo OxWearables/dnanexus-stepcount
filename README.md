@@ -52,7 +52,7 @@ Read the DNAnexus Quickstart to learn the core "`dx`" commands: https://document
     ```console
     dx build_asset stepcount-asset
     ```
-    Note: This might take 10-15 minutes!
+    > Note: This might take 10-15 minutes!
     
     When the build finishes, it will display an *asset ID* at the end (something like `record-Gx3Z650JyBV1f4p5fV7Xp4ZQ`). **Copy this ID**. If you missed it, you can re-read it using `dx describe stepcount-asset`.
 1. Open the file **stepcount/dxapp.json** and search for the field `"assetDepends"`:
@@ -101,6 +101,30 @@ outputs/
     ├── tiny-sample-Steps.png
     └── tiny-sample-StepTimes.csv.gz
 ```
+
+## Versioning
+
+To ensure reproducibility and follow best practices, we recommend explicitly pinning the version of the `stepcount` package in your asset. You can browse [the `stepcount` releases on GitHub](https://github.com/OxWearables/stepcount/releases) to find all available versions.
+
+To pin a version:
+
+1. Open the `stepcount-asset/dxasset.json` file.
+2. Edit the `"execDepends"` section to include the desired version of `stepcount`. For example, to pin the version to 3.12.0, you would specify:
+
+    ```json
+    "execDepends": [
+      {"name": "stepcount", "version": "3.12.0", "package_manager": "pip"},
+      ...
+    ]
+    ```
+3. Save and close the file.
+4. Rebuild the asset by running:
+    
+    ```bash
+    dx build_asset stepcount-asset
+    ```
+
+By pinning the version, you ensure consistent behavior across different environments and over time.
 
 ## Troubleshooting
 
