@@ -5,6 +5,7 @@ Scripts, configuration files, and instructions to build a DNAnexus applet wrappi
 ## Prerequisites
 - Python 3.8 or higher
 - The DNAnexus `dx` toolkit: `pip install dxpy`
+- git
 
 The following shows how to use Anaconda to satisfy the above prerequisites (you can use any Python environment manager):
 
@@ -12,7 +13,7 @@ The following shows how to use Anaconda to satisfy the above prerequisites (you 
 1. (Windows) Once installed, launch the **Anaconda Prompt**.
 1. Create a virtual environment:
     ```console
-    conda create -n dxpy python=3.9 pip
+    conda create -n dxpy python=3.9 pip git
     ```
     This creates a virtual environment called `dxpy` with Python version 3.9 and Pip.
 1. Activate the environment:
@@ -52,7 +53,7 @@ Read the DNAnexus Quickstart to learn the core "`dx`" commands: https://document
     ```console
     dx build_asset stepcount-asset
     ```
-    > Note: This might take 10-15 minutes!
+    > Note: This might take 10-15 minutes! This process might show a bunch of warnings - just ignore them for now.
     
     When the build finishes, it will display an *asset ID* at the end (something like `record-Gx3Z650JyBV1f4p5fV7Xp4ZQ`). **Copy this ID**. If you missed it, you can re-read it using `dx describe stepcount-asset`.
 1. Open the file **stepcount/dxapp.json** and search for the field `"assetDepends"`:
