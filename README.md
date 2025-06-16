@@ -139,3 +139,61 @@ By pinning the version, you ensure consistent behavior across different environm
         }
         ```
         Change `"aws:eu-west-2"` to your project region as indicated in your error message.
+
+## Additional Features
+
+### Processing multiple files
+TODO
+
+### Collating results from multiple runs
+
+After multiple runs, you may wish to merge the several output files into a single file for further analysis. The `stepcount` package does include a secondary CLI tool, `stepcount-collate-outputs`, designed for this purpose. However, to use it on the DNAnexus platform, we must wrap it inside a separate applet.
+
+Follow these steps to build the applet:
+
+1. Open the file **stepcount-collate-outputs/dxapp.json** and locate the `"assetDepends"` field:
+    ```json
+    "assetDepends": [
+      {
+        "id": "record-..."
+      }
+    ]
+    ```
+    Replace `"record-..."` with the asset ID created earlier (`stepcount-asset`).
+
+2. Build the applet:
+    ```console
+    dx build stepcount-collate-outputs
+    ```
+
+Once the applet is built, you can use it with `dx run stepcount-collate-outputs...`. However, additional steps are required as the applet's usage differs slightly from the original CLI tool.
+
+This applet requires a text file containing the file IDs to be collated. Assuming the outputs of the `stepcount` CLI runs are stored in the "outputs/" directory, you can generate the list of file IDs using the following command:
+
+```console
+dx find data --path outputs/ --brief > output-file-ids.txt
+```
+
+This command will create a file named "output-file-ids.txt" with content similar to the following:
+
+```text
+project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVk
+project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz28pPjj9p7vJqkX
+project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2P260x2PjZK0Gy
+project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVg
+...
+```
+
+Next, upload this file to the DNAnexus platform:
+
+```console
+dx upload output-file-ids.txt
+```
+
+Finally, execute the applet with the uploaded file:
+
+```console
+dx run stepcount-collate-outputs -iinput_file=output-file-ids.txt
+```
+
+The collated files will be generated on the DNAnexus platform.
