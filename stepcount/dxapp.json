@@ -19,8 +19,7 @@
   ],
   "outputSpec": [
     {
-      "name": "output_dir",
-      "label": "Output directory",
+      "name": "outputs",
       "class": "array:file",
       "patterns": [
         "*"

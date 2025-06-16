@@ -16,21 +16,19 @@
 
 main() {
 
-    echo "Value of input_file: '$input_file'"
+    echo Input file ID: "$input_file"
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    # Recover the original filename of the input file
+    # Recover the original name of the input file
     local_input_file=$(dx describe "$input_file" --name)
-    echo Original input file name: "$local_input_file"
+    echo Input file name: "$local_input_file"
 
     # Download the input file to the local file system
     dx download "$input_file" -o "$local_input_file"
-
-    # Fill in your application code here.
 
     # Run the stepcount program
     stepcount "$local_input_file"
@@ -47,15 +45,11 @@ main() {
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
 
-    # The following line(s) use the utility dx-jobutil-add-output to format and
-    # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it
-    # does.
-
-    output_files=($(dx upload -r outputs --brief))
-
-    for i in "${!output_files[@]}"; do
-        dx-jobutil-add-output output_dir "${output_files[$i]}" --class=array:file
-    done
+    # To upload results, move them to the directory ~/out/<OUTPUT_DIR>/ then run
+    # `dx-upload-all-outputs`. The OUTPUT_DIR must be defined in the
+    # 'outputSpec' section of dxapp.json.
+    mkdir -p ~/out/outputs/
+    mv outputs ~/out/outputs/
+    dx-upload-all-outputs
 
 }
