@@ -32,9 +32,9 @@ main() {
 
     # Now download each file listed in the provided text file
     mkdir -p files/
-    while IFS= read -r line; do
+    tr -d '\r' < "$local_input_file" | while IFS= read -r line; do
         dx download "$line" -o files/ -f
-    done < "$local_input_file"
+    done
 
     # Core functionality begins here. Use the stepcount-collate-outputs utility
     # to collate the files. By default, the results will be saved in the
