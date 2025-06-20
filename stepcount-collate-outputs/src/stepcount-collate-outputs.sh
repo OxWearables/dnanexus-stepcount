@@ -14,6 +14,9 @@
 # See https://documentation.dnanexus.com/developer for tutorials on how
 # to modify this file.
 
+set -euo pipefail -E
+# set -x  # turn on execution tracing
+
 main() {
 
     echo Input file ID: "$input_file"
