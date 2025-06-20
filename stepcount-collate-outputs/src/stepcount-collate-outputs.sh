@@ -33,11 +33,25 @@ main() {
     # Download the input text file to the local file system
     dx download "$input_file" -o "$local_input_file"
 
-    # Now download each file listed in the provided text file
+    echo "Downloading files listed in $local_input_file..."
     mkdir -p files/
-    tr -d '\r' < "$local_input_file" | while IFS= read -r line; do
-        dx download "$line" -o files/ -f
-    done
+    total=$(wc -l < "$local_input_file")
+    current=0
+    while IFS= read -r line; do
+        # Print progress bar every 10 lines or at the end
+        current=$((current + 1))
+        if (( current % 100 == 0 )) || (( current == total )); then
+            echo "Downloaded $current/$total..."
+        fi
+        # Download the file
+        line=${line%$'\r'}  # strip Windows-style carriage returns
+        if ! dx download "$line" -o files/ -f --lightweight; then
+            echo "Failed to download '$line' (exit code $?)" >&2
+            # Continue to next, or abort here:
+            # exit 1
+        fi
+    done < "$local_input_file"
+    echo "Finished downloading files."
 
     # Core functionality begins here. Use the stepcount-collate-outputs utility
     # to collate the files. By default, the results will be saved in the
