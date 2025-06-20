@@ -33,24 +33,36 @@ main() {
     # Download the input text file to the local file system
     dx download "$input_file" -o "$local_input_file"
 
+    # Function to download a file
+    download() {
+        local path="$1"
+        path=${path%$'\r'}  # strip Windows-style carriage returns
+        if ! dx download "$path" -o files/ -f --lightweight; then
+            echo "FAILED: $path" >&2
+            # exit 1  # Uncomment to abort on failure
+        fi
+    }
+
     echo "Downloading files listed in $local_input_file..."
     mkdir -p files/
-    total=$(wc -l < "$local_input_file")
+    max_jobs=4
     current=0
-    while IFS= read -r line; do
-        # Print progress bar every 10 lines or at the end
-        current=$((current + 1))
-        if (( current % 100 == 0 )) || (( current == total )); then
-            echo "Downloaded $current/$total..."
+    total=$(wc -l < "$local_input_file")
+    next_pct=10
+    while IFS=$'\r' read -r line; do
+        current=$((current+1))
+        curr_pct=$((current * 100 / total))
+        if (( curr_pct >= next_pct )) || (( current == total )); then
+            echo "Progress: $current/$total..."
+            next_pct=$((next_pct + 10))
         fi
-        # Download the file
-        line=${line%$'\r'}  # strip Windows-style carriage returns
-        if ! dx download "$line" -o files/ -f --lightweight; then
-            echo "Failed to download '$line' (exit code $?)" >&2
-            # Continue to next, or abort here:
-            # exit 1
+        download "$line" &
+        # Throttle: wait for a job to finish if we're at limit
+        if (( $(jobs -rp | wc -l) >= max_jobs )); then
+            wait -n
         fi
     done < "$local_input_file"
+    wait  # wait till all background jobs finish
     echo "Finished downloading files."
 
     # Core functionality begins here. Use the stepcount-collate-outputs utility
