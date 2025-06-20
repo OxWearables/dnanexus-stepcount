@@ -147,35 +147,37 @@ TODO
 
 ### Collating results from multiple runs
 
-After multiple runs, you may wish to merge the several output files into a single file for further analysis. The `stepcount` package does include a secondary CLI tool, `stepcount-collate-outputs`, designed for this purpose. However, to use it on the DNAnexus platform, we must wrap it inside a separate applet.
+After multiple runs, you may want to merge the output files into one for further analysis. The `stepcount` package includes a secondary CLI tool, `stepcount-collate-outputs`, made for this purpose. To use it on DNAnexus, you need to wrap it in an applet.
 
 Follow these steps to build the applet:
 
-1. Open the file **stepcount-collate-outputs/dxapp.json** and locate the `"assetDepends"` field:
-    ```json
-    "assetDepends": [
-      {
-        "id": "record-..."
-      }
-    ]
-    ```
-    Replace `"record-..."` with the asset ID created earlier (`stepcount-asset`).
+1. Open **stepcount-collate-outputs/dxapp.json** and find the `"assetDepends"` field:
+
+   ```json
+   "assetDepends": [
+     {
+       "id": "record-..."
+     }
+   ]
+   ```
+
+   Replace `"record-..."` with the asset ID you created earlier (e.g. `stepcount-asset`).
 
 2. Build the applet:
-    ```console
-    dx build stepcount-collate-outputs
-    ```
 
-Once the applet is built, you can use it with `dx run stepcount-collate-outputs...`. However, additional steps are required as the applet's usage differs slightly from the original CLI tool.
+   ```console
+   dx build stepcount-collate-outputs
+   ```
 
-This applet requires a text file containing the file IDs to be collated. Assuming the outputs of the `stepcount` CLI runs are stored in the "outputs/" directory, you can generate the list of file IDs using the following command:
-
+Once built, the applet can be run as follows:
 ```console
-dx find data --path outputs/ --brief > output-file-ids.txt
+dx run stepcount-collate-outputs -iinput_file=my-file-ids.txt
 ```
-
-This command will create a file named "output-file-ids.txt" with content similar to the following:
-
+First, create the `my-file-ids.txt` file listing the file IDs to collate. Assuming the files are in the "outputs/" folder, run:
+```console
+dx find data --path outputs/ --brief > my-file-ids.txt
+```
+This generates a file like:
 ```text
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVk
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz28pPjj9p7vJqkX
@@ -183,17 +185,25 @@ project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2P260x2PjZK0Gy
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVg
 ...
 ```
-
-Next, upload this file to the DNAnexus platform:
-
+Upload the list to DNAnexus:
 ```console
-dx upload output-file-ids.txt
+dx upload my-file-ids.txt
+```
+Then run the applet on that file:
+```console
+dx run stepcount-collate-outputs -iinput_file=my-file-ids.txt
 ```
 
-Finally, execute the applet with the uploaded file:
+#### Speed up file collating by selecting only needed files
+
+If you're working with hundreds of thousands of runs (e.g. UK Biobank), collating everything may be too slow.
+
+The `stepcount` package creates several output types. For example, `*-Info.json` files have overall stats, `*-Daily.csv` files have daily summaries, and `*-Hourly.csv` files show hourly data.
+
+You can speed things up by selecting only the files you need, usually the `*-Info.json` files.
+
+To create a list of just those, run:
 
 ```console
-dx run stepcount-collate-outputs -iinput_file=output-file-ids.txt
+dx find data --path outputs/ --brief --name *-Info.json > only-info-file-ids.txt
 ```
-
-The collated files will be generated on the DNAnexus platform.
