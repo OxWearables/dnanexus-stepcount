@@ -1,6 +1,6 @@
 # DNAnexus applet for the `stepcount` Python package
 
-Scripts, configuration files, and instructions to build a DNAnexus applet wrapping the Python package `stepcount` (https://github.com/OxWearables/stepcount) for use on the DNAnexus platform.
+Scripts, configuration files, and instructions to create a DNAnexus applet for the Python package `stepcount` (https://github.com/OxWearables/stepcount) for use on the DNAnexus platform.
 
 ## Prerequisites
 - Python 3.8 or higher
@@ -15,7 +15,7 @@ The following shows how to use Anaconda to satisfy the above prerequisites (you 
     ```console
     conda create -n dxpy python=3.9 pip git
     ```
-    This creates a virtual environment called `dxpy` with Python version 3.9 and Pip.
+    This creates a virtual environment named `dxpy` with Python version 3.9 and Pip.
 1. Activate the environment:
     ```console
     conda activate dxpy
@@ -26,7 +26,7 @@ The following shows how to use Anaconda to satisfy the above prerequisites (you 
     pip install dxpy
     ```
 
-You are all set! You have created an environment called `dxpy`, containing the DNAnexus package `dxpy`.
+You are all set! You have created an environment named `dxpy`, containing the DNAnexus package `dxpy`.
 The next time that you want to use `dxpy`, open the Anaconda Prompt and activate the environment (step 4: `conda activate dxpy`). If you see `(dxpy)` in front of your prompt, you are ready to go!
 
 Read the DNAnexus Quickstart to learn the core "`dx`" commands: https://documentation.dnanexus.com/getting-started/cli-quickstart. TL;DR:
@@ -115,7 +115,7 @@ To pin a version:
     ```json
     "execDepends": [
       {"name": "stepcount", "version": "3.12.0", "package_manager": "pip"},
-      ...
+      {...},
     ]
     ```
 3. Save and close the file.
@@ -133,9 +133,7 @@ By pinning the version, you ensure consistent behavior across different environm
     - Solution: Open **stepcount/dxapp.json** and search for the `"regionalOptions"` field:
         ```json
         "regionalOptions": {
-            "aws:eu-west-2": {
-                ...
-            }
+            "aws:eu-west-2": {...}
         }
         ```
         Change `"aws:eu-west-2"` to your project region as indicated in your error message.
