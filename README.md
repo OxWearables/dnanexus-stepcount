@@ -57,7 +57,7 @@ Read the DNAnexus Quickstart to learn the core "`dx`" commands: https://document
     
     When the build finishes, it will display an *asset ID* at the end (something like `record-Gx3Z650JyBV1f4p5fV7Xp4ZQ`). **Copy this ID**. If you missed it, you can re-read it using `dx describe stepcount-asset`.
 1. Open the file **stepcount/dxapp.json** and search for the field `"assetDepends"`:
-    ```json
+    ```text
     "assetDepends": [
       {
         "id": "record-..."
@@ -112,7 +112,7 @@ To pin a version:
 1. Open the `stepcount-asset/dxasset.json` file.
 2. Edit the `"execDepends"` section to include the desired version of `stepcount`. For example, to pin the version to 3.12.0, you would specify:
 
-    ```json
+    ```text
     "execDepends": [
       {"name": "stepcount", "version": "3.12.0", "package_manager": "pip"},
       {...},
@@ -131,7 +131,7 @@ By pinning the version, you ensure consistent behavior across different environm
 
 - Error: ('destination project is in region aws:xx-xxxx-x but "regionalOptions" do not contain this region. Please, update your "regionalOptions" specification',)
     - Solution: Open **stepcount/dxapp.json** and search for the `"regionalOptions"` field:
-        ```json
+        ```text
         "regionalOptions": {
             "aws:eu-west-2": {...}
         }
@@ -151,7 +151,7 @@ Follow these steps to build the applet:
 
 1. Open **stepcount-collate-outputs/dxapp.json** and find the `"assetDepends"` field:
 
-   ```json
+   ```text
    "assetDepends": [
      {
        "id": "record-..."
