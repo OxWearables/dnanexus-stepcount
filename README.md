@@ -140,9 +140,9 @@ By pinning the version, you ensure consistent behavior across different environm
 
 ## Additional Guides
 
-### Processing Multiple Files
+### Processing multiple files
 
-There are several ways to process multiple files, but the most straightforward method is to run a separate `dx run` command for each file. Below, we demonstrate how to do this programmatically using basic Unix shell commands.
+The most straightforward approach to process multiple files is to run a separate `dx run` command for each file. Below, we demonstrate how to do this programmatically using basic Unix shell commands (it should also work in Windows Anaconda Prompt).
 
 The first step is to generate a list of file paths you want to process. In this example, we use accelerometer data files from the UK Biobank (approximately 100,000 files). We leverage the `dx find data` command, filtered by the field ID for accelerometer data (`90001`), and use `awk` to extract just the file paths:
 
@@ -151,7 +151,6 @@ dx find data --property field_id=90001 | awk '{print $6}' > my-files.txt
 ```
 
 The resulting `my-files.txt` file should contain entries like:
-
 ```text
 /Bulk/Activity/Raw/54/5408734_90001_1_0.cwa
 /Bulk/Activity/Raw/49/4945583_90001_1_0.cwa
@@ -159,16 +158,21 @@ The resulting `my-files.txt` file should contain entries like:
 ...
 ```
 
-To launch a job for each file, run the following command:
-
+Finally, we use `xargs` to submit a job for each entry:
 ```console
-xargs -n1 -P5 -I {} sh -c 'dx run stepcount -iinput_file="{}" -y --brief 2>>errors.log && echo "Launched: {}"' < my-files.txt
+xargs -P10 -I {} sh -c 'dx run stepcount -iinput_file=":{}" -y --brief' < my-files.txt | tee my-jobs.txt
 ```
+This will execute `dx run stepcount ...` for each entry in `my-files.txt`. It will also create a log file `my-jobs.txt` containing the list of submitted job IDs.
 
-This will execute `dx run stepcount ...` for each line in `my-files.txt`. Errors will be logged to `errors.log`.
-
-For more batch processing methods, see the tutorial by the UK Biobank team:
+For additional batch processing strategies, see the tutorial by the UK Biobank team:
 [https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk\_files\_processing.ipynb](https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk_files_processing.ipynb)
+
+### Terminating multiple jobs
+
+If you need to terminate multiple job submissions, the `my-jobs.txt` file can be used as follows:
+```console
+xargs -P10 -I {} sh -c 'dx terminate "{}"' < my-jobs.txt
+```
 
 ### Collating results from multiple runs
 
@@ -209,7 +213,6 @@ This generates a file like:
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVk
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz28pPjj9p7vJqkX
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2P260x2PjZK0Gy
-project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVg
 ...
 ```
 Note that, unlike the earlier file that listed paths, this one lists file IDs.
