@@ -138,14 +138,41 @@ By pinning the version, you ensure consistent behavior across different environm
         ```
         Change `"aws:eu-west-2"` to your project region as indicated in your error message.
 
-## Additional Features
+## Additional Guides
 
-### Processing multiple files
-TODO
+### Processing Multiple Files
+
+There are several ways to process multiple files, but the most straightforward method is to run a separate `dx run` command for each file. Below, we demonstrate how to do this programmatically using basic Unix shell commands.
+
+The first step is to generate a list of file paths you want to process. In this example, we use accelerometer data files from the UK Biobank (approximately 100,000 files). We leverage the `dx find data` command, filtered by the field ID for accelerometer data (`90001`), and use `awk` to extract just the file paths:
+
+```console
+dx find data --property field_id=90001 | awk '{print $6}' > my-files.txt
+```
+
+The resulting `my-files.txt` file should contain entries like:
+
+```text
+/Bulk/Activity/Raw/54/5408734_90001_1_0.cwa
+/Bulk/Activity/Raw/49/4945583_90001_1_0.cwa
+/Bulk/Activity/Raw/20/2066665_90001_1_0.cwa
+...
+```
+
+To launch a job for each file, run the following command:
+
+```console
+xargs -n1 -P5 -I {} sh -c 'dx run stepcount -iinput_file="{}" -y --brief 2>>errors.log && echo "Launched: {}"' < my-files.txt
+```
+
+This will execute `dx run stepcount ...` for each line in `my-files.txt`. Errors will be logged to `errors.log`.
+
+For more batch processing methods, see the tutorial by the UK Biobank team:
+[https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk\_files\_processing.ipynb](https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk_files_processing.ipynb)
 
 ### Collating results from multiple runs
 
-After multiple runs, you may want to merge the output files into one for further analysis. The `stepcount` package includes a secondary CLI tool, `stepcount-collate-outputs`, made for this purpose. To use it on DNAnexus, you need to wrap it in an applet.
+After running multiple jobs, you may want to merge their output files for further analysis. The `stepcount` package includes a secondary CLI tool, `stepcount-collate-outputs`, made for this purpose. To use it on DNAnexus, you'll need to create a separate applet (you can reuse the previously created asset, avoiding the time-consuming build process).
 
 Follow these steps to build the applet:
 
@@ -159,7 +186,7 @@ Follow these steps to build the applet:
    ]
    ```
 
-   Replace `"record-..."` with the asset ID you created earlier (e.g. `stepcount-asset`).
+   Replace `"record-..."` with the asset ID you created earlier (i.e. `stepcount-asset`).
 
 2. Build the applet:
 
@@ -169,12 +196,14 @@ Follow these steps to build the applet:
 
 Once built, the applet can be run as follows:
 ```console
-dx run stepcount-collate-outputs -iinput_file=my-file-ids.txt
+dx run stepcount-collate-outputs -iinput_file=my-outputs.txt
 ```
-First, create the `my-file-ids.txt` file listing the file IDs to collate. Assuming the files are in the "outputs/" folder, run:
+
+First, create the `my-outputs.txt` file listing the file IDs to collate. Assuming the files are in the "outputs/" folder, run:
 ```console
-dx find data --path outputs/ --brief > my-file-ids.txt
+dx find data --path outputs/ --brief > my-outputs.txt
 ```
+
 This generates a file like:
 ```text
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVk
@@ -183,13 +212,15 @@ project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2P260x2PjZK0Gy
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVg
 ...
 ```
-Upload the list to DNAnexus:
+Note that, unlike the earlier file that listed paths, this one lists file IDs.
+
+Next, upload the list to DNAnexus:
 ```console
-dx upload my-file-ids.txt
+dx upload my-outputs.txt
 ```
-Then run the applet on that file:
+Finally, run the collate applet on that list:
 ```console
-dx run stepcount-collate-outputs -iinput_file=my-file-ids.txt
+dx run stepcount-collate-outputs -iinput_file=my-outputs.txt
 ```
 
 #### Speed up file collating by selecting only needed files
@@ -203,5 +234,5 @@ You can speed things up by selecting only the files you need, usually the `*-Inf
 To create a list of just those, run:
 
 ```console
-dx find data --path outputs/ --brief --name *-Info.json > only-info-file-ids.txt
+dx find data --path outputs/ --brief --name *-Info.json > only-info-outputs.txt
 ```
