@@ -102,14 +102,14 @@ https://wearables-files.ndph.ox.ac.uk/files/data/samples/ax3/tiny-sample.cwa.gz
 
 and upload it to your DNAnexus project: `dx upload tiny-sample.cwa.gz`
 
-Now you can run `stepcount` on the uploaded sample file:
-
+You can now run the applet on the uploaded sample file:
 ```console
 dx run stepcount -iinput_file=tiny-sample.cwa.gz
 ```
 ⏳ This takes 5–10 minutes.
 
-After the run finishes, you should see an `outputs/` folder in your DNAnexus project. You can check with `dx tree outputs/` which should look like this:
+This starts a new job on DNAnexus. The job ID that appears in the output can be used to monitor the run from the DNAnexus website.
+Once the job finishes, an `outputs/` folder will be created in your project. You can view its contents with `dx tree outputs/` which should look like this:
 
 ```console
 outputs/
@@ -140,9 +140,9 @@ outputs/
 
 ## 🔁 Running on Multiple Files
 
-The most straightforward approach to process multiple files is to run a separate `dx run` command for each file. Below, we demonstrate how to do this programmatically using basic Unix shell commands (it should also work in Windows Anaconda Prompt).
+The most straightforward approach to process multiple files is to submit one `dx run` command per file. The example below shows how to automate this using standard Unix commands (it also works in the Windows Anaconda Prompt).
 
-The first step is to generate a list of file paths you want to process. In this example, we use accelerometer data files from the UK Biobank (approximately 100,000 files). We leverage the `dx find data` command, filtered by the field ID for accelerometer data (`90001`), and use `awk` to extract just the file paths:
+First, you'll need to generate a list of file paths to process. In this example, we're working with UK Biobank accelerometer data (about 100,000 files). We use the `dx find data` command to filter by field ID 90001 (UK Biobank ID for accelerometry), and then use `awk` to extract just the file paths:
 
 ```console
 dx find data --property field_id=90001 | awk '{print $6}' > my-files.txt
@@ -201,7 +201,7 @@ Once built, the applet can be run as follows:
 dx run stepcount-collate-outputs -iinput_file=my-outputs.txt
 ```
 
-First, create the `my-outputs.txt` file listing the file IDs to collate. Assuming the files are in the "outputs/" folder, run:
+First, create the `my-outputs.txt` file listing the file IDs to collate. Assuming the files are in the `outputs/` folder, run:
 ```console
 dx find data --path outputs/ --brief > my-outputs.txt
 ```
