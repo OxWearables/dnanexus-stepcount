@@ -2,7 +2,7 @@
 
 Scripts, configuration files, and instructions to create a DNAnexus applet for the Python package `stepcount` (https://github.com/OxWearables/stepcount) for use on the DNAnexus platform.
 
-## Prerequisites
+## ✅ Prerequisites
 - Python 3.8 or higher
 - The DNAnexus `dx` toolkit: `pip install dxpy`
 - git
@@ -10,53 +10,76 @@ Scripts, configuration files, and instructions to create a DNAnexus applet for t
 The following shows how to use Anaconda to satisfy the above prerequisites (you can use any Python environment manager):
 
 1. Download & install [Miniconda](https://docs.conda.io/en/latest/miniconda.html) (light-weight version of Anaconda).
-1. (Windows) Once installed, launch the **Anaconda Prompt**.
-1. Create a virtual environment:
+1. (Windows only) Open the **Anaconda Prompt** (Start Menu).
+1. Create a new environment named `dxpy` with Python, Pip, and Git:
     ```console
     conda create -n dxpy python=3.9 pip git
     ```
-    This creates a virtual environment named `dxpy` with Python version 3.9 and Pip.
 1. Activate the environment:
     ```console
     conda activate dxpy
     ```
-    You should now see `(dxpy)` written in front of your prompt.
+    You should now see `(dxpy)` at the beginning of your command prompt.
 1. Install `dxpy`:
     ```console
     pip install dxpy
     ```
 
-You are all set! You have created an environment named `dxpy`, containing the DNAnexus package `dxpy`.
-The next time that you want to use `dxpy`, open the Anaconda Prompt and activate the environment (step 4: `conda activate dxpy`). If you see `(dxpy)` in front of your prompt, you are ready to go!
+🟢 **You are now ready!** You've created an environment called `dxpy` containing the DNAnexus CLI.
 
-Read the DNAnexus Quickstart to learn the core "`dx`" commands: https://documentation.dnanexus.com/getting-started/cli-quickstart. TL;DR:
-- Use `dx login` to login to your DNAnexus account (username and password are the same as with the web browser).
-- Most DNAnexus commands are basically Unix commands prefixed with "`dx`". For example:
-    - `dx ls` to list files
-    - `dx cd` to navigate folders
-    - `dx mkdir` to create new folders
-    - `dx rm` to remove files
-    - `dx mv` to move/rename files
-    - ...
+> 🔁 **Next time**:
+> Just open the Anaconda Prompt and run:
+>
+> ```bash
+> conda activate dxpy
+> ```
+>
+> If you see `(dxpy)` in your prompt, you’re good to go.
 
-## Building the applet
+## 🔐 DNAnexus Login & Basic Commands
+
+Log in to DNAnexus:
+
+```bash
+dx login
+```
+
+Use your regular DNAnexus username/password.
+
+Basic DNAnexus commands (prefixed with `dx`) mimic Unix commands:
+
+| Command    | Meaning               |
+| ---------- | --------------------- |
+| `dx ls`    | List files/folders    |
+| `dx cd`    | Change directories    |
+| `dx mkdir` | Create a new folder   |
+| `dx rm`    | Delete a file         |
+| `dx mv`    | Move or rename a file |
+
+📖 For more: [DNAnexus CLI Quickstart](https://documentation.dnanexus.com/getting-started/cli-quickstart)
+
+## 🛠️ Building the Applet
 
 1. Clone this repository:
     ```console
     git clone https://github.com/OxWearables/dnanexus-stepcount.git
-    ```
-1. Navigate to cloned folder:
-    ```console
     cd dnanexus-stepcount/
     ```
-1. Build the asset required by the applet:
+
+1. Build the asset:
     ```console
     dx build_asset stepcount-asset
     ```
-    > Note: This might take 10-15 minutes! This process might show a bunch of warnings - just ignore them for now.
+    ⏳ This takes 10–15 minutes and may show warnings&mdash;ignore them.
     
-    When the build finishes, it will display an *asset ID* at the end (something like `record-Gx3Z650JyBV1f4p5fV7Xp4ZQ`). **Copy this ID**. If you missed it, you can re-read it using `dx describe stepcount-asset`.
-1. Open the file **stepcount/dxapp.json** and search for the field `"assetDepends"`:
+1. When complete, **copy the asset ID** (e.g., `record-abc123`).
+   If you missed it:
+
+   ```bash
+   dx describe stepcount-asset
+   ```
+
+1. Open the file `stepcount/dxapp.json` find this section:
     ```text
     "assetDepends": [
       {
@@ -64,13 +87,14 @@ Read the DNAnexus Quickstart to learn the core "`dx`" commands: https://document
       }
     ]
     ```
-    Replace `"record-..."` with the ID you copied from the previous step. Save and exit.
+   Replace `"record-..."` with the actual asset ID. Save and close.
+
 1. Finally, build the applet:
     ```
     dx build stepcount
     ```
 
-## Running the applet
+## ▶️ Running the Applet
 
 To begin, download a sample accelerometer file:
 
@@ -83,9 +107,9 @@ Now you can run `stepcount` on the uploaded sample file:
 ```console
 dx run stepcount -iinput_file=tiny-sample.cwa.gz
 ```
-Note: This might take 5-10 minutes!
+⏳ This takes 5–10 minutes.
 
-After the run finishes, you should see an "outputs/" folder in your DNAnexus project. You can check with `dx tree outputs/` which should look like this:
+After the run finishes, you should see an `outputs/` folder in your DNAnexus project. You can check with `dx tree outputs/` which should look like this:
 
 ```console
 outputs/
@@ -103,7 +127,7 @@ outputs/
     └── tiny-sample-StepTimes.csv.gz
 ```
 
-## Troubleshooting
+## 🧯 Troubleshooting
 
 - Error: ('destination project is in region aws:xx-xxxx-x but "regionalOptions" do not contain this region. Please, update your "regionalOptions" specification',)
     - Solution: Open **stepcount/dxapp.json** and search for the `"regionalOptions"` field:
@@ -114,9 +138,7 @@ outputs/
         ```
         Change `"aws:eu-west-2"` to your project region as indicated in your error message.
 
-## Additional Guides
-
-### Processing multiple files
+## 🔁 Running on Multiple Files
 
 The most straightforward approach to process multiple files is to run a separate `dx run` command for each file. Below, we demonstrate how to do this programmatically using basic Unix shell commands (it should also work in Windows Anaconda Prompt).
 
@@ -143,14 +165,14 @@ This will execute `dx run stepcount ...` for each entry in `my-files.txt`. It wi
 For additional batch processing strategies, see the tutorial by the UK Biobank team:
 [https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk\_files\_processing.ipynb](https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk_files_processing.ipynb)
 
-### Terminating multiple jobs
+### 🛑 Terminating Multiple Jobs
 
 If you need to terminate multiple job submissions, the `my-jobs.txt` file can be used as follows:
 ```console
 xargs -P10 -I {} sh -c 'dx terminate "{}"' < my-jobs.txt
 ```
 
-### Collating results from multiple runs
+## 📊 Collating Outputs from Multiple Runs
 
 After running multiple jobs, you may want to merge their output files for further analysis. The `stepcount` package includes a secondary CLI tool, `stepcount-collate-outputs`, made for this purpose. To use it on DNAnexus, you'll need to create a separate applet (you can reuse the previously created asset, avoiding the time-consuming build process).
 
@@ -202,7 +224,7 @@ Finally, run the collate applet on that list:
 dx run stepcount-collate-outputs -iinput_file=my-outputs.txt
 ```
 
-#### Speed up file collating by selecting only needed files
+#### 💡 Tip: Speed Up File Collating by Selecting Only Needed Files
 
 If you're working with hundreds of thousands of runs (e.g. UK Biobank), collating everything may be too slow.
 
@@ -216,11 +238,9 @@ To create a list of just those, run:
 dx find data --path outputs/ --brief --name *-Info.json > only-info-outputs.txt
 ```
 
-### Versioning
+## 📌 Versioning for Reproducibility
 
-To ensure reproducibility and follow best practices, we recommend explicitly pinning the version of the `stepcount` package in your asset. You can browse [the `stepcount` releases on GitHub](https://github.com/OxWearables/stepcount/releases) to find all available versions.
-
-To pin a version:
+To ensure reproducibility and follow best practices, we recommend explicitly pinning the version of the `stepcount` package in your asset.
 
 1. Open the `stepcount-asset/dxasset.json` file.
 2. Edit the `"execDepends"` section to include the desired version of `stepcount`. For example, to pin the version to 3.12.0, you would specify:
@@ -238,4 +258,5 @@ To pin a version:
     dx build_asset stepcount-asset
     ```
 
-By pinning the version, you ensure consistent behavior across different environments and over time.
+Find all available versions of `stepcount` here:
+👉 [https://github.com/OxWearables/stepcount/releases](https://github.com/OxWearables/stepcount/releases)
