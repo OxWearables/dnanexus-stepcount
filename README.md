@@ -108,7 +108,8 @@ dx run stepcount -iinput_file=tiny-sample.cwa.gz
 ```
 ⏳ This takes 5–10 minutes.
 
-This starts a new job on DNAnexus. The job ID that appears in the output can be used to monitor the run from the DNAnexus website.
+This starts a new job on DNAnexus.
+The job ID shown in the output (e.g. `job-AbCdE12345`) can be used to track its progress in the DNAnexus web interface under the “Monitor” tab.
 Once the job finishes, an `outputs/` folder will be created in your project. You can view its contents with `dx tree outputs/` which should look like this:
 
 ```console
@@ -140,9 +141,9 @@ outputs/
 
 ## 🔁 Running on Multiple Files
 
-The most straightforward approach to process multiple files is to submit one `dx run` command per file. The example below shows how to automate this using standard Unix commands (it also works in the Windows Anaconda Prompt).
+The most straightforward way to process multiple files is to submit one `dx run` command per file. The example below shows how to automate this using standard Unix commands (it also works in the Windows Anaconda Prompt).
 
-First, you'll need to generate a list of file paths to process. In this example, we're working with UK Biobank accelerometer data (about 100,000 files). We use the `dx find data` command to filter by field ID 90001 (UK Biobank ID for accelerometry), and then use `awk` to extract just the file paths:
+First, you'll need to generate a list of file paths you want to process. In this example, we're working with UK Biobank accelerometer data (about 100,000 files). We use the [`dx find data`](https://documentation.dnanexus.com/user/objects/searching-data-objects#searching-across-objects-in-the-current-project) command to filter by field ID 90001 (UK Biobank ID for accelerometry), and then use [`awk`](https://en.wikipedia.org/wiki/AWK) to extract just the file paths:
 
 ```console
 dx find data --property field_id=90001 | awk '{print $6}' > my-files.txt
@@ -156,7 +157,7 @@ The resulting `my-files.txt` file should contain entries like:
 ...
 ```
 
-Finally, we use `xargs` to submit a job for each entry:
+Finally, we use [`xargs`](https://en.wikipedia.org/wiki/Xargs) to submit a job for each entry:
 ```console
 xargs -P10 -I {} sh -c 'dx run stepcount -iinput_file=":{}" -y --brief' < my-files.txt | tee my-jobs.txt
 ```
@@ -174,11 +175,9 @@ xargs -P10 -I {} sh -c 'dx terminate "{}"' < my-jobs.txt
 
 ## 📊 Collating Outputs from Multiple Runs
 
-After running multiple jobs, you may want to merge their output files for further analysis. The `stepcount` package includes a secondary CLI tool, `stepcount-collate-outputs`, made for this purpose. To use it on DNAnexus, you'll need to create a separate applet (you can reuse the previously created asset, avoiding the time-consuming build process).
+After running multiple jobs, you may want to merge their output files for further analysis. The `stepcount` package includes a secondary CLI tool, `stepcount-collate-outputs`, made for this purpose. To use it on DNAnexus, you'll need to create a separate applet (you can reuse the already created `stepcount-asset` asset, avoiding the time-consuming asset building process):
 
-Follow these steps to build the applet:
-
-1. Open **stepcount-collate-outputs/dxapp.json** and find the `"assetDepends"` field:
+1. Open **stepcount-collate-outputs/dxapp.json** and find this section:
 
    ```text
    "assetDepends": [
@@ -196,43 +195,41 @@ Follow these steps to build the applet:
    dx build stepcount-collate-outputs
    ```
 
-Once built, the applet can be run as follows:
+The applet can then be used as follows:
 ```console
 dx run stepcount-collate-outputs -iinput_file=my-outputs.txt
 ```
 
-First, create the `my-outputs.txt` file listing the file IDs to collate. Assuming the files are in the `outputs/` folder, run:
+First, create the `my-outputs.txt` file listing the IDs of the files you want to collate. We will use [`dx find data`](https://documentation.dnanexus.com/user/objects/searching-data-objects#searching-across-objects-in-the-current-project) for this. Assuming the files are in the `outputs/` folder, run:
 ```console
 dx find data --path outputs/ --brief > my-outputs.txt
 ```
 
-This generates a file like:
+The resulting `my-outputs.txt` file will look like this:
 ```text
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2Gb3gkV0p3XfVk
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz28pPjj9p7vJqkX
 project-GXJBY38JZ32Vb0588YVYx3Gy:file-Gx4k9hjJVz2P260x2PjZK0Gy
 ...
 ```
-Note that, unlike the earlier file that listed paths, this one lists file IDs.
+Note that, unlike the `my-files.txt` file from the previous section which listed file paths, this one lists file IDs.
 
 Next, upload the list to DNAnexus:
 ```console
 dx upload my-outputs.txt
 ```
-Finally, run the collate applet on that list:
+Finally, run the collate applet on the list:
 ```console
 dx run stepcount-collate-outputs -iinput_file=my-outputs.txt
 ```
 
 #### 💡 Tip: Speed Up File Collating by Selecting Only Needed Files
 
-If you're working with hundreds of thousands of runs (e.g. UK Biobank), collating everything may be too slow.
+If you're dealing with hundreds of thousands of output files (e.g. UK Biobank), collating everything may be too slow.
 
 The `stepcount` package creates several output types. For example, `*-Info.json` files have overall stats, `*-Daily.csv` files have daily summaries, and `*-Hourly.csv` files show hourly data.
 
-You can speed things up by selecting only the files you need, usually the `*-Info.json` files.
-
-To create a list of just those, run:
+You can speed things up by selecting only the files you need using the `--name` option in the `dx find data` command. For example, if you only want the `*-Info.json` files:
 
 ```console
 dx find data --path outputs/ --brief --name *-Info.json > only-info-outputs.txt
