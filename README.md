@@ -13,7 +13,7 @@ The following shows how to use Anaconda to satisfy the above prerequisites (you 
 1. (Windows only) Open the **Anaconda Prompt** (Start Menu).
 1. Create a new environment named `dxpy` with Python, Pip, and Git:
     ```console
-    conda create -n dxpy python=3.9 pip git
+    conda create -n dxpy python=3.9 pip git jq
     ```
 1. Activate the environment:
     ```console
@@ -159,18 +159,24 @@ The resulting `my-files.txt` file should contain entries like:
 
 Finally, we use [`xargs`](https://en.wikipedia.org/wiki/Xargs) to submit a job for each entry:
 ```console
-xargs -P10 -I {} sh -c 'dx run stepcount -iinput_file=":{}" -y --brief' < my-files.txt | tee my-jobs.txt
+xargs -P10 -I {} sh -c "dx run stepcount -iinput_file=:{} -y --brief" < my-files.txt | tee my-jobs.txt
 ```
 This will execute `dx run stepcount ...` for each entry in `my-files.txt`. It will also create a log file `my-jobs.txt` containing the list of submitted job IDs.
 
 For additional batch processing strategies, see the tutorial by the UK Biobank team:
 [https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk\_files\_processing.ipynb](https://github.com/UK-Biobank/UKB-RAP-Imaging-ML/blob/main/stepcount-applet/bulk_files_processing.ipynb)
 
-### 🛑 Terminating Multiple Jobs
-
-If you need to terminate multiple job submissions, the `my-jobs.txt` file can be used as follows:
+### 🔍 Monitoring Jobs
+To monitor the submitted jobs, the `my-jobs.txt` file can be used as follows:
 ```console
-xargs -P10 -I {} sh -c 'dx terminate "{}"' < my-jobs.txt
+xargs -P10 -I {} sh -c "dx describe {} --json | jq -r .state" < my-jobs.txt | sort | uniq -c
+```
+
+### 🛑 Terminating Jobs
+
+If you need to terminate the submitted jobs, the `my-jobs.txt` file can be used as follows:
+```console
+xargs -P10 -I {} sh -c "dx terminate {}" < my-jobs.txt
 ```
 
 ## 📊 Collating Outputs from Multiple Runs
