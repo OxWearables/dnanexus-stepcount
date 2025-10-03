@@ -158,9 +158,13 @@ The resulting `my-files.txt` file should contain entries like:
 ```
 
 Finally, we use [`xargs`](https://en.wikipedia.org/wiki/Xargs) to submit a job for each entry:
-```console
+<!-- ```console
 xargs -P10 -I {} sh -c "dx run stepcount -iinput_file=:{} -y --brief" < my-files.txt | tee my-jobs.txt
+``` -->
+```console
+xargs -P10 -I {} sh -c "while :; do dx run stepcount -iinput_file=:{} -y --brief 2>/dev/null | sed 's/$//' && { sleep 0.5; break; } || { echo Retrying {} >&2; sleep 5; }; done" < my-files.txt | tee my-jobs.txt
 ```
+
 This will execute `dx run stepcount ...` for each entry in `my-files.txt`. It will also create a log file `my-jobs.txt` containing the list of submitted job IDs.
 
 For additional batch processing strategies, see the tutorial by the UK Biobank team:
