@@ -158,11 +158,8 @@ The resulting `my-files.txt` file should contain entries like:
 ```
 
 Finally, we use [`xargs`](https://en.wikipedia.org/wiki/Xargs) to submit a job for each entry:
-<!-- ```console
-xargs -P10 -I {} sh -c "dx run stepcount -iinput_file=:{} -y --brief" < my-files.txt | tee my-jobs.txt
-``` -->
 ```console
-xargs -P10 -I {} sh -c "while :; do dx run stepcount -iinput_file=:{} -y --brief 2>/dev/null | sed 's/$//' && { sleep 0.5; break; } || { echo Retrying {} >&2; sleep 5; }; done" < my-files.txt | tee my-jobs.txt
+xargs -P10 -I {} sh -c "while :; do dx run stepcount -iinput_file=:{} -y --brief 2>/dev/null | sed 's/\r$//' && { sleep 0.5; break; } || { echo Retrying {} >&2; sleep 5; }; done" < my-files.txt | tee my-jobs.txt
 ```
 
 This will execute `dx run stepcount ...` for each entry in `my-files.txt`. It will also create a log file `my-jobs.txt` containing the list of submitted job IDs.
@@ -242,7 +239,7 @@ The `stepcount` package creates several output types. For example, `*-Info.json`
 You can speed things up by selecting only the files you need using the `--name` option in the `dx find data` command. For example, if you only want the `*-Info.json` files:
 
 ```console
-dx find data --path outputs/ --brief --name *-Info.json > only-info-outputs.txt
+dx find data --path outputs/ --brief --name '*-Info.json' > only-info-outputs.txt
 ```
 
 ## 📌 Versioning for Reproducibility
