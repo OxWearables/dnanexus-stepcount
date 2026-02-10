@@ -12,7 +12,8 @@
       "class": "file",
       "optional": false,
       "patterns": [
-        "*.txt", "*.csv"
+        "*.txt",
+        "*.csv"
       ],
       "help": ""
     }
@@ -28,6 +29,14 @@
     }
   ],
   "runSpec": {
+    "executionPolicy": {
+      "restartOn": {
+        "UnresponsiveWorker": 2,
+        "SpotInstanceInterruption": 3,
+        "ExecutionError": 1
+      },
+      "restartableEntryPoints": "master"
+    },
     "timeoutPolicy": {
       "*": {
         "hours": 72
