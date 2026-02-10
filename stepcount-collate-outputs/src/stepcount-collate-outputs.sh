@@ -33,19 +33,31 @@ main() {
     # Download the input text file to the local file system
     dx download "$input_file" -o "$local_input_file"
 
-    # Function to download a file
+    # Function to download a file with retries and exponential backoff
+    fail_file=$(mktemp)
+    echo 0 > "$fail_file"
     download() {
         local path="$1"
         path=${path%$'\r'}  # strip Windows-style carriage returns
-        if ! dx download "$path" -o files/ -f --lightweight; then
-            echo "FAILED: $path" >&2
-            exit 1
-        fi
+        local max_retries=3
+        local attempt=1
+        local delay=5
+        while (( attempt <= max_retries )); do
+            if dx download "$path" -o files/ -f --lightweight; then
+                return 0
+            fi
+            echo "WARN: attempt $attempt/$max_retries failed for $path, retrying in ${delay}s..." >&2
+            sleep $delay
+            attempt=$((attempt + 1))
+            delay=$((delay * 2))
+        done
+        echo "FAILED after $max_retries attempts: $path" >&2
+        echo 1 > "$fail_file"
     }
 
     echo "Downloading files listed in $local_input_file..."
     mkdir -p files/
-    max_jobs=4
+    max_jobs=16
     current=0
     total=$(wc -l < "$local_input_file")
     next_pct=10
@@ -63,6 +75,13 @@ main() {
         fi
     done < "$local_input_file"
     wait  # wait till all background jobs finish
+
+    if [ "$(cat "$fail_file")" = "1" ]; then
+        echo "ERROR: One or more downloads failed." >&2
+        rm -f "$fail_file"
+        exit 1
+    fi
+    rm -f "$fail_file"
     echo "Finished downloading files."
 
     # Core functionality begins here. Use the stepcount-collate-outputs utility
