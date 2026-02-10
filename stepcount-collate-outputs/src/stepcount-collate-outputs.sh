@@ -39,7 +39,7 @@ main() {
         path=${path%$'\r'}  # strip Windows-style carriage returns
         if ! dx download "$path" -o files/ -f --lightweight; then
             echo "FAILED: $path" >&2
-            # exit 1  # Uncomment to abort on failure
+            exit 1
         fi
     }
 
@@ -68,7 +68,21 @@ main() {
     # Core functionality begins here. Use the stepcount-collate-outputs utility
     # to collate the files. By default, the results will be saved in the
     # 'collated-outputs/' directory.
+
+    # Background monitor: log memory and disk usage every 5 minutes
+    (
+        while true; do
+            echo "--- Monitor $(date) ---"
+            free -h
+            df -h .
+            sleep 300
+        done
+    ) &
+    monitor_pid=$!
+
     stepcount-collate-outputs files/
+
+    kill $monitor_pid 2>/dev/null || true
 
     # To report any recognized errors in the correct format in
     # $HOME/job_error.json and exit this script, you can use the
