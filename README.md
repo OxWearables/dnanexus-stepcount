@@ -128,6 +128,22 @@ outputs/
     └── tiny-sample-StepTimes.csv.gz
 ```
 
+### Optional Parameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `model_type` | `ssl` | Model type: `ssl` (Self-Supervised Learning) or `rf` (Random Forest) |
+| `exclude_first_last` | | Exclude `first`, `last`, or `both` days of data (often partial wear) |
+| `exclude_wear_below` | | Exclude days with wear time below threshold, e.g. `12H` or `30min` |
+| `min_wear_per_day` | | Minimum required wear time (minutes) for a day to be valid |
+| `start` | | Start time for processing, e.g. `2024-01-01 10:00:00` |
+| `end` | | End time for processing, e.g. `2024-01-02 09:59:59` |
+
+Example with options:
+```console
+dx run stepcount -iinput_file=tiny-sample.cwa.gz -imodel_type=rf -iexclude_first_last=both
+```
+
 ## 🧯 Troubleshooting
 
 - Error: ('destination project is in region aws:xx-xxxx-x but "regionalOptions" do not contain this region. Please, update your "regionalOptions" specification',)
