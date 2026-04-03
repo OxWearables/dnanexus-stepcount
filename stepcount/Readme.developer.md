@@ -1,13 +1,5 @@
 # stepcount Developer Readme
 
-<!--
-TODO: Please edit this Readme.developer.md file to include information
-for developers or advanced users, for example:
-
-* Information about app internals and implementation details
-* How to report bugs or contribute to development
--->
-
 ## Running this app with additional computational resources
 
 This app has the following entry points:
