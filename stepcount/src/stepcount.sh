@@ -24,7 +24,25 @@ main() {
 
     retry dx download "$input_file" -o "$local_input_file" -f
 
-    stepcount "$local_input_file"
+    cmd=(stepcount "$local_input_file" --model-type "$model_type")
+    if [ -n "$exclude_first_last" ]; then
+        cmd+=(--exclude-first-last "$exclude_first_last")
+    fi
+    if [ -n "$exclude_wear_below" ]; then
+        cmd+=(--exclude-wear-below "$exclude_wear_below")
+    fi
+    if [ -n "${min_wear_per_day:-}" ]; then
+        cmd+=(--min-wear-per-day "$min_wear_per_day")
+    fi
+    if [ -n "$start" ]; then
+        cmd+=(--start "$start")
+    fi
+    if [ -n "$end" ]; then
+        cmd+=(--end "$end")
+    fi
+
+    echo "Running: ${cmd[*]}"
+    "${cmd[@]}"
 
     mkdir -p ~/out/outputs/
     mv outputs ~/out/outputs/

@@ -15,6 +15,55 @@
         "*"
       ],
       "help": ""
+    },
+    {
+      "name": "model_type",
+      "label": "Model type",
+      "class": "string",
+      "optional": true,
+      "default": "ssl",
+      "choices": ["ssl", "rf"],
+      "help": "Model type to use: 'ssl' (Self-Supervised Learning) or 'rf' (Random Forest)."
+    },
+    {
+      "name": "exclude_first_last",
+      "label": "Exclude first/last days",
+      "class": "string",
+      "optional": true,
+      "default": "",
+      "choices": ["", "first", "last", "both"],
+      "help": "Exclude first, last, or both days of data (often partial wear)."
+    },
+    {
+      "name": "exclude_wear_below",
+      "label": "Exclude days with wear time below threshold",
+      "class": "string",
+      "optional": true,
+      "default": "",
+      "help": "Exclude days with wear time below threshold, e.g. '12H' or '30min'."
+    },
+    {
+      "name": "min_wear_per_day",
+      "label": "Min wear time per day (minutes)",
+      "class": "int",
+      "optional": true,
+      "help": "Minimum required wear time in minutes for a day to be considered valid."
+    },
+    {
+      "name": "start",
+      "label": "Start time",
+      "class": "string",
+      "optional": true,
+      "default": "",
+      "help": "Start time for processing, e.g. '2024-01-01 10:00:00'. Default: process all."
+    },
+    {
+      "name": "end",
+      "label": "End time",
+      "class": "string",
+      "optional": true,
+      "default": "",
+      "help": "End time for processing, e.g. '2024-01-02 09:59:59'. Default: process all."
     }
   ],
   "outputSpec": [
